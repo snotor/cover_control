@@ -41,4 +41,3 @@ where <name> is the apps.yaml block key (or an explicit `name:` arg).
      move_start_timeout    10     seconds to wait for movement to begin
      move_timeout          30     seconds max to reach target
      tick_interval         30     seconds between recompute + UI refresh
- =============================================================================
