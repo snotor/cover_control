@@ -12,6 +12,7 @@ where <name> is the apps.yaml block key (or an explicit `name:` arg).
   apps.yaml keys
   --------------
   REQUIRED (no default — omitting one stops the app loading):
+  
      module / class        cover_control / CoverControl
      cover_entity          the cover to drive
      pos_sensor            current position sensor, 0-100
@@ -22,6 +23,7 @@ where <name> is the apps.yaml block key (or an explicit `name:` arg).
      window_height         glass height, metres
 
   OPTIONAL (shown with defaults — omit any line to accept the default):
+  
      name                  (self.name)  slug for the three sensors
      sun_depth             0.30   allowed sun penetration onto floor, metres
      elevation_min         25     sun below this -> open
