@@ -193,6 +193,7 @@ class CoverControl(_Base):
         self.last_move_time   = now - datetime.timedelta(seconds=self.cooldown)
         self.override_start   = now
         self.cloud_open       = False
+        self.shading          = False
         self.moving_by_app    = False
         self.commanded_target = None
         self.pos_at_command   = None
@@ -240,6 +241,7 @@ class CoverControl(_Base):
             boundary = "cloud"
 
         effective = self.cfg["pos_max"] if boundary != "clear" else raw
+        self.shading = boundary == "clear"   # gates manual-override arming
 
         # Display sensors update regardless of control state.
         self.set_state(self.s_target, state=raw,
@@ -345,7 +347,11 @@ class CoverControl(_Base):
                 self.commanded_target = None
                 self.evaluate()
         else:
-            self._activate_override()            # someone moved it by hand
+            # Only pause for a hand-move while we're actively shading. When the
+            # cover is open anyway (cloud / low sun / out of view), another
+            # automation moving it shouldn't trigger an override.
+            if self.shading:
+                self._activate_override()
 
     # ---- override + master ----
     def _activate_override(self):
