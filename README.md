@@ -1,43 +1,63 @@
-cover_control.py — the ONLY AppDaemon app in this project.
-One instance per window (one block per window in apps.yaml). Holds all
-state (deadbands, override, watchdog) and calls the pure functions in
-cover_geometry.py and cover_ui.py. Publishes three auto-named sensors:
+# Adaptive Cover Shading
 
-    sensor.<name>_target_position   raw shading % (ignores boundaries)
-    sensor.<name>_boundary          why the cover is/ isn't shading
-    sensor.<name>_status            control state (+ countdowns)
+Sun-aware shading for Home Assistant covers, running as a single [AppDaemon](https://appdaemon.readthedocs.io/) app.
 
-where <name> is the apps.yaml block key (or an explicit `name:` arg).
+It positions each cover from the live sun position so direct sunlight reaches no more than a set distance into the room — keeping rooms cooler in summer without leaving them dark. It opens fully when the sun is too low, too high, off to the side, or when it's cloudy, and backs off if you move the cover by hand.
 
-  apps.yaml keys
-  --------------
-  REQUIRED (no default — omitting one stops the app loading):
-  
-     module / class        cover_control / CoverControl
-     cover_entity          the cover to drive
-     pos_sensor            current position sensor, 0-100
-     master_switch         app-wide enable input_boolean
-     override_bool         this window's manual-override input_boolean
-     cloud_sensor          cloud coverage sensor, 0-100
-     window_azimuth        bearing the window faces, degrees
-     window_height         glass height, metres
+## Requirements
 
-  OPTIONAL (shown with defaults — omit any line to accept the default):
-  
-     name                  (self.name)  slug for the three sensors
-     sun_depth             0.30   allowed sun penetration onto floor, metres
-     elevation_min         25     sun below this -> open
-     elevation_max         70     sun above this -> open
-     fov_left              70     deg left of centre still shaded
-     fov_right             70     deg right of centre still shaded
-     position_min          30     position where the window is fully covered
-     position_max          100    fully open
-     snap_open             80     target >= this -> snap to 100
-     min_diff              5      smallest % change worth moving for
-     move_cooldown         600    seconds between auto-moves (time deadband)
-     override_duration     7200   seconds before override auto-clears
-     cloud_threshold       80     cloud % above which it opens fully
-     cloud_clear_threshold 65     cloud % below which shading resumes (hysteresis)
-     move_start_timeout    10     seconds to wait for movement to begin
-     move_timeout          30     seconds max to reach target
-     tick_interval         30     seconds between recompute + UI refresh
+- Home Assistant (uses the built-in `sun.sun`).
+- AppDaemon ([add-on](https://github.com/hassio-addons/addon-appdaemon) or container).
+- A cover that supports `set_cover_position` (`0 = closed`, `100 = open`).
+- A cloud-coverage sensor with a `0–100` state.
+- Two `input_boolean` helpers: an app-wide enable and one override toggle per window.
+
+## Install
+
+1. Copy `cover_control.py` into your `appdaemon/apps/` folder.
+2. Create the helpers:
+
+   ```yaml
+   input_boolean:
+     covers_enabled:
+       name: Covers enabled
+     livingroom_override:
+       name: Living room override
+   ```
+
+3. Add one block per window to `apps.yaml`:
+
+   ```yaml
+   livingroom:
+     module: cover_control
+     class: CoverControl
+     cover_entity: cover.livingroom
+     master_switch: input_boolean.covers_enabled
+     override_bool: input_boolean.livingroom_override
+     cloud_sensor: sensor.cloud_coverage
+     window_azimuth: 145      # bearing the window faces (0=N, 90=E, 180=S, 270=W)
+     window_height: 1.0       # glass height in metres
+   ```
+
+4. Reload AppDaemon.
+
+Only these keys are required; every other option (penetration depth, elevation and field-of-view limits, deadbands, timeouts, cloud thresholds) has a default and is documented at the top of `cover_control.py`.
+
+## What you get
+
+Each window publishes three sensors, named from its block key:
+
+- `sensor.<name>_target_position` — the position the sun geometry wants.
+- `sensor.<name>_boundary` — why it is or isn't shading (shading / cloudy / sun too low / etc.).
+- `sensor.<name>_status` — control state (stable, override, deadband, moving…).
+
+Toggle `covers_enabled` to enable, and each window's override boolean to pause it manually.
+
+## Optional
+
+- **Inverted cover** (`0 = open`): set `position_min: 100` and `position_max: 0`.
+- **Preview before installing**: edit the `CONFIG` block in `simulate_day.py` and run `python3 simulate_day.py` to print a day's shading curve — no Home Assistant needed.
+
+## License
+
+[MIT](LICENSE)
