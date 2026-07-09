@@ -56,7 +56,6 @@ Toggle `covers_enabled` to enable, and each window's override boolean to pause i
 ## Optional
 
 - **Inverted cover** (`0 = open`): set `position_min: 100` and `position_max: 0`.
-- **Preview before installing**: edit the `CONFIG` block in `simulate_day.py` and run `python3 simulate_day.py` to print a day's shading curve — no Home Assistant needed.
 
 ## License
 
