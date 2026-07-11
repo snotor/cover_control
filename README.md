@@ -10,7 +10,7 @@ It positions each cover from the live sun position so direct sunlight reaches no
 - AppDaemon ([add-on](https://github.com/hassio-addons/addon-appdaemon) or container).
 - A cover that supports `set_cover_position` (`0 = closed`, `100 = open`).
 - Two `input_boolean` helpers: an app-wide enable and one override toggle per window.
-- *(Optional)* A cloud-coverage sensor with a `0–100` state, so shading pauses (goes idle) when it's overcast (e.g. a template sensor off your weather integration — see Install). Omit `cloud_sensor` to disable this.
+- *(Optional)* A cloud-coverage sensor with a `0–100` state, so shading opens when it's overcasts (Omit `cloud_sensor` to disable this).
 
 ## Install
 
