@@ -24,7 +24,7 @@ It positions each cover from the live sun position so direct sunlight reaches no
 {{ state_attr('weather.forecast_home', 'cloud_coverage') | float(0) }}
 ```
 
-   > Replace `weather.forecast_home` with your weather entity if it's named differently.
+   Replace `weather.forecast_home` with your weather entity if it's named differently.
 
 3. Copy `cover_control.py` into your `appdaemon/apps/` folder.
 
